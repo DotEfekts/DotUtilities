@@ -25,6 +25,7 @@ You can store the manager in a MenuManager object, or just use the `createMenu()
   * The number of slots in the menu (Must be a multiple of 9).
 3. `String title`
   * The title shown at the top of the menu.
+
 * `Menu`
   * The menu created from the parameters.
 
@@ -56,6 +57,7 @@ Creates a new Menu object based on the parameters provided. The title will be sh
   * The y position of the button (0 based).
 4. `ButtonListener listener`
   * The ButtonListener object that should be called when the button is clicked in the menu.
+
 * `MenuButton`
   * The button created from the parameters.
 
@@ -82,6 +84,7 @@ Returns a boolean that is true if this menu is still active and false if it has 
 ####compareInventory
 1. `Inventory inventory`
   * The inventory to compare to.
+
 * `boolean`
   * Whether or not the inventory is for this menu.
 
@@ -119,7 +122,7 @@ Returns the menu object that owns this button.
 
 
 ###ButtonListener : Interface
-1. `uttonClicked() : boolean`
+1. `buttonClicked() : boolean`
   * The method to call when a button is clicked.
 
 
