@@ -14,13 +14,11 @@ DotUtilities.getMenuManager();
 
 You can store the manager in a MenuManager object, or just use the `createMenu()` method and store the resulting menu. It is recommended to just create a menu, as that's the only method that's exposed.
 
-MenuManager
-###
+###MenuManager
 1. createMenu() : Menu
 ⋅⋅⋅Create a new menu.
 
-createMenu
-####
+####createMenu
 1. Player player
 ⋅⋅⋅The player to create the menu for.
 2. int size
@@ -34,8 +32,7 @@ Creates a new Menu object based on the parameters provided. The title will be sh
 
 
 
-Menu
-###
+###Menu
 1. setButton() : MenuButton
 ⋅⋅⋅Create a button on the menu.
 2. showMenu() : void
@@ -50,8 +47,7 @@ Menu
 ⋅⋅⋅Check if an inventory is the inventory for this menu.
 
 
-setButton
-####
+####setButton
 1. ItemStack item
 ⋅⋅⋅The item to display for the button.
 2. int x
@@ -65,30 +61,25 @@ setButton
 
 Creates a new button using the parameters and adds it to the menu in the position specified. Returns a MenuButton object with the new button.
 
-showMenu
-####
+####showMenu
 
 Shows the current menu to the player. Note if you modify the item stack of a button while it is being shown to the player you must call this again to update the displayed items, modifications to the button listener will be updated instantly).
 
-getPlayer
-####
+####getPlayer
 * Player
 ⋅⋅⋅The player that this menu was created for.
 
 Returns the holder of this menu that was specified during it's creation.
 
-markDestruction
-####
+####markDestruction
 
 Removes this menu from the menu tracker so that it can be allowed to go out of scope for the GC to collect. Note that trying to show a menu after calling this will throw an InteralMenuException.
 
-getExists
-####
+####getExists
 
 Returns a boolean that is true if this menu is still active and false if it has been marked for destruction. Note that is a player quits the server a menu will automatically be marked for destruction.
 
-compareInventory
-####
+####compareInventory
 1. Inventory inventory
 ⋅⋅⋅The inventory to compare to.
 * boolean
@@ -98,8 +89,7 @@ Returns a boolean that is true if the inventory provided is the inventory genera
 
 
 
-MenuButton
-#####
+#####MenuButton
 1. setListener() : void
 ⋅⋅⋅Set the button listener for this MenuButton.
 2. setItem() : void
@@ -108,22 +98,19 @@ MenuButton
 ⋅⋅⋅Get the menu this button is for.
 
 
-setListener
-####
+####setListener
 1. ButtonListener listener
 ⋅⋅⋅The ButtonListener to call when the player clicks this button.
 
 The buttonClicked method in the listener is called whenever the player clicks the button.
 
-setItem
-####
+####setItem
 1. ItemStack item
 ⋅⋅⋅The item to display for this button
 
 Sets the item this button will display when the menu is shown to the player.
 
-getParent
-####
+####getParent
 * Menu
 ⋅⋅⋅The menu that this button belongs to.
 
@@ -131,14 +118,12 @@ Returns the menu object that owns this button.
 
 
 
-ButtonListener : Interface
-#####
+#####ButtonListener : Interface
 1. buttonClicked() : boolean
 ⋅⋅⋅The method to call when a button is clicked.
 
 
-buttonClicked
-####
+####buttonClicked
 * boolean
 ⋅⋅⋅Whether or not to close the menu.
 
