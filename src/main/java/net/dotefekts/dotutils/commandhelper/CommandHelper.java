@@ -1,36 +1,40 @@
 package net.dotefekts.dotutils.commandhelper;
 
 
-import net.dotefekts.dotutils.DotUtilities;
+import java.util.HashMap;
 
 import org.bukkit.command.PluginCommand;
+import org.bukkit.plugin.java.JavaPlugin;
 
 public class CommandHelper {
 	private CommandManager manager;
-	private DotUtilities plugin;
 	private CommandRegistration register;
 	private CommandListener listener;
+	private HashMap<String, JavaPlugin> commandSource;
 	private static CommandHelper instance;
 	
-	private CommandHelper(DotUtilities plugin){
-		this.plugin = plugin;
+	private CommandHelper(){
 		manager = new CommandManager(this);
 		listener = new CommandListener(manager);
-		register = new CommandRegistration(plugin);		
+		register = new CommandRegistration();
+		commandSource = new HashMap<String, JavaPlugin>();
 	}
 	
 	PluginCommand getCommand(String command){
-		return plugin.getCommand(command);
+		if(commandSource.containsKey(command))
+			return commandSource.get(command).getCommand(command);
+		else
+			return null;
 	}
 	
-	void registerCommand(String command){
-		register.registerCommand(command, listener);
-		
+	void registerCommand(String command, JavaPlugin plugin){
+		PluginCommand cmd = register.registerCommand(command, listener, plugin);
+		commandSource.put(cmd.getLabel(), plugin);
 	}
 	
-	public static CommandManager get(DotUtilities plugin){
+	public static CommandManager get(){
 		if(instance == null)
-			instance = new CommandHelper(plugin);
+			instance = new CommandHelper();
 		return instance.manager;
 	}
 }

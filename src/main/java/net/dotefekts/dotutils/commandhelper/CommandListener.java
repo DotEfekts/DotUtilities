@@ -85,9 +85,12 @@ public class CommandListener implements CommandExecutor {
 			}
 			
 			try {
-				command.getExecutor().invoke(command.getListener(), new CommandEvent(commandSender, command, newArgs));
+				 Boolean result = (Boolean) command.getExecutor().invoke(command.getListener(), new CommandEvent(commandSender, command, newArgs));
+				 return result.booleanValue();
 			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 				e.printStackTrace();
+				commandSender.sendMessage(ChatColor.RED + "An exception occurred during execution of the command. You should let the server owner know about this.");
+				return true;
 			}
 		} else {
 			List<String> list = getSublist(args, !(commandSender instanceof Player), cmd);

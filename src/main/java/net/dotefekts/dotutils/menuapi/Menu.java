@@ -13,12 +13,13 @@ public class Menu {
 	
 	Menu(Player player, int size, String title) {
 		int mod = size % 9;
-		if(mod != 0){
+		if(mod != 0) {
 			int sizePre = size;
-			size = mod < 4.5 ? size - mod : size + (9 - mod);
+			size = size + (9 - mod);
 			Bukkit.getLogger().warning("A menu was created with " + sizePre + " slots."
-					+ " The number of slots must be divisible by 9. The number has been corrected to " + size);
+					+ " The number of slots must be divisible by 9. The number has been increased to " + size);
 		}
+		
 		inv = Bukkit.createInventory(player, size, title);
 		buttons = new MenuButton[size];
 		manager.registerMenu(this);

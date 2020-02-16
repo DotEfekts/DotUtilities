@@ -10,21 +10,19 @@ import org.bukkit.command.CommandMap;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.SimplePluginManager;
-
-import net.dotefekts.dotutils.DotUtilities;
+import org.bukkit.plugin.java.JavaPlugin;
 
 class CommandRegistration {
-	private DotUtilities plugin;
 	
-	CommandRegistration(DotUtilities plugin) {
-		this.plugin = plugin;
-	}
-	
-	PluginCommand registerCommand(String command, CommandExecutor executor){
-		if(plugin.getCommand(command) == null)
-			getCommandMap().register(command, getCommand(command, plugin));
-		plugin.getCommand(command).setExecutor(executor);
-		return plugin.getCommand(command);
+	PluginCommand registerCommand(String command, CommandExecutor executor, JavaPlugin plugin){
+		if(plugin.getCommand(command) == null) 
+			if(!getCommandMap().register(command, getCommand(command, plugin)))
+				Bukkit.getLogger().warning("Fallback prefix registered for " + command + ".");
+		
+		PluginCommand cmd = plugin.getCommand(command);
+		cmd.setExecutor(executor);
+		
+		return cmd;
 	}
 	
 	private static CommandMap getCommandMap() {

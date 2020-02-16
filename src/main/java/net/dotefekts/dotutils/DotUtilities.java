@@ -28,8 +28,10 @@ public class DotUtilities extends JavaPlugin implements Listener {
 	@Override
 	public void onEnable(){
 		DotUtilities.menuAPI = MenuAPI.get(this);
-		DotUtilities.commandHelper = CommandHelper.get(this);
+		DotUtilities.commandHelper = CommandHelper.get();
 		Bukkit.getPluginManager().registerEvents(this, this);
+		
+		getLogger().info("DotUtilities loaded.");
 	}
 	
 	public static MenuManager getMenuManager(){

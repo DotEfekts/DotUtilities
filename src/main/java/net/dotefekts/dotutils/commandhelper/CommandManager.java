@@ -9,9 +9,10 @@ import org.bukkit.command.PluginCommand;
 import org.bukkit.event.Listener;
 import org.bukkit.help.GenericCommandHelpTopic;
 import org.bukkit.permissions.PermissionDefault;
+import org.bukkit.plugin.java.JavaPlugin;
 
 public class CommandManager {
-	private ArrayList<String> commandLookup;
+	private HashMap<String, JavaPlugin> commandLookup;
 	private HashMap<String, CommandCompleter> tabCompleters;
 	private CommandHelper helper;
 	private SubmenuManager submanager;
@@ -19,12 +20,12 @@ public class CommandManager {
 	
 	CommandManager(CommandHelper helper) {
 		this.helper = helper;
-		commandLookup = new ArrayList<String>();
+		commandLookup = new HashMap<String, JavaPlugin>();
 		tabCompleters = new HashMap<String, CommandCompleter>();
 		submanager = new SubmenuManager();
 	}
 	
-	public void registerCommands(Listener listener) {
+	public void registerCommands(Listener listener, JavaPlugin plugin) {
 		int intMethods = 0;
 		int intCommands = 0;
 		Class<? extends Listener> listenerClass = listener.getClass();
@@ -36,12 +37,17 @@ public class CommandManager {
 				permission = new Permission(handler.node(), handler.description(), handler.permissionDefault());
 			}
 			
-			if(method.isAnnotationPresent(CommandHandlers.class)){
+			if(method.isAnnotationPresent(CommandHandlers.class)) {
+				if(method.getReturnType() != boolean.class) {
+					Bukkit.getLogger().warning("[CommandHelper] Tried to register " + method.getName() + " but had a return type that was not boolean.");
+					continue;
+				}
+					
 				if(method.getParameterTypes().length == 1) {
 					if(method.getParameterTypes()[0].equals(CommandEvent.class)) {
 						CommandHandler[] annos = method.getAnnotation(CommandHandlers.class).value();
 						ArrayList<Command> newCommands = new ArrayList<Command>();
-						ArrayList<String> newCommandLookup = new ArrayList<String>();
+						HashMap<String, JavaPlugin> newCommandLookup = new HashMap<String, JavaPlugin>();
 						
 						String command = "";
 						String description = "";
@@ -72,8 +78,8 @@ public class CommandManager {
 								
 							newCommands.add(new Command(command, description, format, serverCommand, null, method, listener));
 							intCommands++;
-							if(!newCommandLookup.contains(command))
-								newCommandLookup.add(command);
+							if(!newCommandLookup.containsKey(command))
+								newCommandLookup.put(command, plugin);
 						}
 					
 						if(permission != null)
@@ -84,11 +90,11 @@ public class CommandManager {
 								cmd.setPermission(defPermission);
 						
 						for(Command cmd : newCommands){
-							registerCommand(cmd);
+							registerCommand(cmd, plugin);
 						}
 
 						submanager.addList(newCommands);
-						commandLookup.addAll(newCommandLookup);
+						commandLookup.putAll(newCommandLookup);
 						intMethods++;
 					} else {
 						Bukkit.getLogger().warning("[CommandHelper] Parameter type for method " + method.getName() + " incorrect for CommandHandler");
@@ -97,6 +103,11 @@ public class CommandManager {
 					Bukkit.getLogger().warning("[CommandHelper] Number of parameters for method " + method.getName() + " incorrect.");
 				}
 			} else if(method.isAnnotationPresent(CommandHandler.class)){
+				if(method.getReturnType() != boolean.class) {
+					Bukkit.getLogger().warning("[CommandHelper] Tried to register " + method.getName() + " but had a return type that was not boolean.");
+					continue;
+				}
+				
 				CommandHandler handler = method.getAnnotation(CommandHandler.class);
 				
 				if(checkValid(handler.command(), method.getName())){
@@ -110,15 +121,14 @@ public class CommandManager {
 					submanager.addSubcommand(command);
 					
 					intCommands++;
-					if(!commandLookup.contains(handler.command()))
-						commandLookup.add(handler.command());
+					commandLookup.put(handler.command(), plugin);
 				
 					if(permission != null)
 						command.setPermission(permission);
 					else
 						command.setPermission(defPermission);
 						
-					registerCommand(command);
+					registerCommand(command, plugin);
 					intMethods++;
 				}
 			}
@@ -129,7 +139,7 @@ public class CommandManager {
 	private boolean checkValidSilent(String command, String name) {
 		if(command.isEmpty())
 			return false;
-		else if(commandLookup.contains(command))
+		else if(commandLookup.containsKey(command))
 			return false;
 		else if(helper.getCommand(command.split(" ")[0]) != null)
 			if(!(helper.getCommand(command.split(" ")[0]).getTabCompleter() instanceof CommandCompleter))
@@ -208,9 +218,9 @@ public class CommandManager {
 		return true;
 	}
 
-	private void registerCommand(Command cmd) {
+	private void registerCommand(Command cmd, JavaPlugin plugin) {
 		String cmdString = cmd.getCommand().split(" ")[0];
-		helper.registerCommand(cmdString);
+		helper.registerCommand(cmdString, plugin);
 		PluginCommand pCmd = helper.getCommand(cmdString);
 		pCmd.setPermission(cmd.getPermission().getPermissionDefault().toString());
 		if(cmd.getSubcommand().length == 0) {
@@ -246,7 +256,7 @@ public class CommandManager {
 		if(command.isEmpty()) {
 			Bukkit.getLogger().warning("[CommandHelper] No command supplied for the method " + method);
 			return false;
-		} else if(commandLookup.contains(command)) {
+		} else if(commandLookup.containsKey(command)) {
 			Bukkit.getLogger().warning("[CommandHelper] Method " + method+ " tried to register a command registered to another method.");
 			return false;
 		} else if(helper.getCommand(command.split(" ")[0]) != null)
