@@ -22,23 +22,23 @@ public class MenuButton {
 	
 	void buttonClicked() {
 		if(listener != null)
-			listener.buttonClicked();
+			listener.buttonClicked(menu, this);
 	}
 	
-	ItemStack getItem() {
-		return item;
+	ButtonListener getListener() {
+		return listener;
 	}
 	
-	int getPos() {
+	public ItemStack getItem() {
+		return item.clone();
+	}
+	
+	public int getPos() {
 		return pos;
 	}
 	
 	public void setListener(ButtonListener listener) {
 		this.listener = listener;
-	}
-	
-	ButtonListener getListener() {
-		return listener;
 	}
 	
 	public void setItem(ItemStack item) {

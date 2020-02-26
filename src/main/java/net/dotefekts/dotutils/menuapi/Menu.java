@@ -11,7 +11,7 @@ public class Menu {
 	private MenuManager manager;
 	private boolean exists = true;
 	
-	Menu(Player player, int size, String title) {
+	Menu(Player player, int size, String title, MenuManager manager) {
 		int mod = size % 9;
 		if(mod != 0) {
 			int sizePre = size;
@@ -23,14 +23,21 @@ public class Menu {
 		inv = Bukkit.createInventory(player, size, title);
 		buttons = new MenuButton[size];
 		manager.registerMenu(this);
+		this.manager = manager;
 	}
 	
 	public MenuButton setButton(ItemStack item, int x, int y, ButtonListener listener) {
-		int pos = (x * 9) + y;		
+		int pos = x + (y * 9);		
 		MenuButton button = new MenuButton(item, this, pos, listener);
 		buttons[pos] = button;
 		inv.setItem(button.getPos(), button.getItem());
 		return button;
+	}
+	
+	public void setTitle(String newTitle) {
+		Inventory newInv = Bukkit.createInventory(inv.getHolder(), inv.getSize(), newTitle);
+		newInv.setContents(inv.getContents());
+		inv = newInv;
 	}
 	
 	MenuButton getButton(int pos){
@@ -57,6 +64,10 @@ public class Menu {
 	
 	public Player getPlayer() {
 		return (Player)inv.getHolder();
+	}
+	
+	public Inventory getInventory() {
+		return inv;
 	}
 	
 	public void markDestruction() {

@@ -16,7 +16,7 @@ class CommandRegistration {
 	
 	PluginCommand registerCommand(String command, CommandExecutor executor, JavaPlugin plugin){
 		if(plugin.getCommand(command) == null) 
-			if(!getCommandMap().register(command, getCommand(command, plugin)))
+			if(!getCommandMap().register(plugin.getName().toLowerCase().replace(' ', '_'), getCommand(command, plugin)))
 				Bukkit.getLogger().warning("Fallback prefix registered for " + command + ".");
 		
 		PluginCommand cmd = plugin.getCommand(command);
@@ -35,13 +35,7 @@ class CommandRegistration {
 	 
 				commandMap = (CommandMap) f.get(Bukkit.getPluginManager());
 			}
-		} catch (NoSuchFieldException e) {
-			e.printStackTrace();
-		} catch (SecurityException e) {
-			e.printStackTrace();
-		} catch (IllegalArgumentException e) {
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
+		} catch (NoSuchFieldException|SecurityException|IllegalArgumentException|IllegalAccessException e) {
 			e.printStackTrace();
 		}
 	 

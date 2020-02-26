@@ -13,7 +13,7 @@ public class MenuManager {
 	}
 	
 	public Menu createMenu(Player player, int size, String title){
-		return new Menu(player, size, title);
+		return new Menu(player, size, title, this);
 	}
 	
 	void registerMenu(Menu menu) {
@@ -26,14 +26,24 @@ public class MenuManager {
 	}
 
 	LookupContainer lookup(Inventory inventory, int slot) {
-		for(Menu menu : activeMenus)
-			if(menu.compareInventory(inventory)) {
-				return new LookupContainer(menu.getButton(slot), menu);
+		if(slot >= 0 && slot < inventory.getSize() ) {
+			for(Menu menu : activeMenus) {
+				if(menu.compareInventory(inventory)) {
+					return new LookupContainer(menu.getButton(slot), menu);
+				}
 			}
+		}
 		return null;
 	}
 	
-	boolean isMenu(Inventory inventory){
+	public Menu findMenu(Inventory inventory) {
+		for(Menu menu : activeMenus)
+			if(menu.compareInventory(inventory))
+				return menu;
+		return null;
+	}
+	
+	public boolean isMenu(Inventory inventory){
 		for(Menu menu : activeMenus)
 			if(menu.compareInventory(inventory))
 				return true;

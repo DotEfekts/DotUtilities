@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import net.dotefekts.dotutils.DotUtilities;
+import net.dotefekts.dotutils.UtilityFunctions;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -59,7 +59,7 @@ class SubmenuManager {
 	static ArrayList<String> generateSubmenu(List<Command> commands, String[] submenu){
 		if(commands.size() == 0)
 			return null;
-		String sub = DotUtilities.joinArray(submenu, " ");
+		String sub = UtilityFunctions.joinArray(submenu, " ");
 		ArrayList<String> menu = new ArrayList<String>();
 		ArrayList<String> menus = new ArrayList<String>();
 		ArrayList<Command> menuCommands = new ArrayList<Command>();

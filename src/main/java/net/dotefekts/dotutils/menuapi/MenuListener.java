@@ -19,10 +19,10 @@ public class MenuListener implements Listener {
 	
 	@EventHandler
 	public void inventoryClick(InventoryClickEvent event) throws InternalMenuException {
-		LookupContainer cont = manager.lookup(event.getInventory(), event.getSlot());
+		LookupContainer cont = manager.lookup(event.getClickedInventory(), event.getSlot());
 		if(cont != null){
 			if(cont.hasListener())
-				Bukkit.getScheduler().runTask(plugin, new ButtonRunnable(cont.getMenu(), cont.getButton().getListener()));
+				Bukkit.getScheduler().runTask(plugin, new ButtonRunnable(cont.getMenu(), cont.getButton()));
 			event.setCancelled(true);
 		}
 	}

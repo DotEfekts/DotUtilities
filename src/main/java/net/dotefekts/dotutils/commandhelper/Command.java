@@ -3,6 +3,7 @@ package net.dotefekts.dotutils.commandhelper;
 import java.lang.reflect.Method;
 
 import org.bukkit.event.Listener;
+import org.bukkit.permissions.Permission;
 
 public class Command {
 	private String command;

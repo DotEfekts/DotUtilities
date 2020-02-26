@@ -8,6 +8,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.event.Listener;
 import org.bukkit.help.GenericCommandHelpTopic;
+import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -222,7 +223,7 @@ public class CommandManager {
 		String cmdString = cmd.getCommand().split(" ")[0];
 		helper.registerCommand(cmdString, plugin);
 		PluginCommand pCmd = helper.getCommand(cmdString);
-		pCmd.setPermission(cmd.getPermission().getPermissionDefault().toString());
+		pCmd.setPermission(cmd.getPermission().getDefault().toString());
 		if(cmd.getSubcommand().length == 0) {
 			pCmd.setPermissionMessage("You don't have permission to do that.");
 			if(!cmd.getDescription().isEmpty())

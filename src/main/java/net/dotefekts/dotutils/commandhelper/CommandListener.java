@@ -29,7 +29,7 @@ public class CommandListener implements CommandExecutor {
 				newArgs[i - len] = args[i];
 
 			if(!command.isServerCommand())
-				if(!command.getPermission().hasPermission((Player)commandSender)){
+				if(!((Player)commandSender).hasPermission(command.getPermission())) {
 					commandSender.sendMessage(ChatColor.RED + "You don't have permission to do that.");
 					return true;
 				}
@@ -60,7 +60,7 @@ public class CommandListener implements CommandExecutor {
 								return true;
 							}
 						} else if(format[i].startsWith("p")){
-							if(DotUtilities.getUUID(newArgs[i]) == null) {
+							if(DotUtilities.getUUIDTracker().getUUID(newArgs[i]) == null) {
 								commandSender.sendMessage(ChatColor.RED + "Error, the argument " + newArgs[i] + " must be an online player.");
 								return true;
 							}
