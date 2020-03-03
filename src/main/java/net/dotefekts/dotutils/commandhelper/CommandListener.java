@@ -4,8 +4,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
-import net.dotefekts.dotutils.DotUtilities;
-
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -21,21 +20,21 @@ public class CommandListener implements CommandExecutor {
 	@Override
 	public boolean onCommand(CommandSender commandSender, org.bukkit.command.Command cmd, String label, String[] args) {
 		Command command = manager.matchCommand(cmd.getName(), args, !(commandSender instanceof Player));
-		if(command != null){
-			int len = command.getSubcommand().length;
-			String[] newArgs = new String[args.length - len];
-			
-			for(int i = len; i < args.length; i++)
-				newArgs[i - len] = args[i];
-
+		if(command != null) {
 			if(!command.isServerCommand())
 				if(!((Player)commandSender).hasPermission(command.getPermission())) {
 					commandSender.sendMessage(ChatColor.RED + "You don't have permission to do that.");
 					return true;
 				}
 			
-			if(!command.getFormat().isEmpty()){	
-				if(command.getFormat().equalsIgnoreCase("n") && args.length > 0) {
+			int len = command.getSubcommand().length;
+			String[] newArgs = new String[args.length - len];
+			
+			for(int i = len; i < args.length; i++)
+				newArgs[i - len] = args[i];
+			
+			if(!command.getFormat().isEmpty()) {	
+				if(command.getFormat().equalsIgnoreCase("n") && newArgs.length > 0) {
 					commandSender.sendMessage(ChatColor.RED + "Error, too many arguments provided.");
 					return true;
 				}
@@ -60,7 +59,7 @@ public class CommandListener implements CommandExecutor {
 								return true;
 							}
 						} else if(format[i].startsWith("p")){
-							if(DotUtilities.getUUIDTracker().getUUID(newArgs[i]) == null) {
+							if(Bukkit.getPlayerExact(newArgs[i]) == null) {
 								commandSender.sendMessage(ChatColor.RED + "Error, the argument " + newArgs[i] + " must be an online player.");
 								return true;
 							}

@@ -41,7 +41,7 @@ public class CommandCompleter implements TabCompleter {
 		if(format.length >= args.length - subcommand.length && formatPos >= 0){
 			if(format[formatPos].startsWith("p")){
 				for(Player player : Bukkit.getOnlinePlayers())
-					if(player.getName().startsWith(args[argPos]))
+					if(player.getName().toLowerCase().startsWith(args[argPos].toLowerCase()))
 						auto.add(player.getName());
 			}
 		}

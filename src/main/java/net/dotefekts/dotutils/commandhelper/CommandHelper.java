@@ -27,9 +27,11 @@ public class CommandHelper {
 			return null;
 	}
 	
-	void registerCommand(String command, JavaPlugin plugin){
+	PluginCommand registerCommand(String command, JavaPlugin plugin){
 		PluginCommand cmd = register.registerCommand(command, listener, plugin);
 		commandSource.put(cmd.getLabel(), plugin);
+		
+		return cmd;
 	}
 	
 	public static CommandManager get(){

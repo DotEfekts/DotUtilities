@@ -221,11 +221,9 @@ public class CommandManager {
 
 	private void registerCommand(Command cmd, JavaPlugin plugin) {
 		String cmdString = cmd.getCommand().split(" ")[0];
-		helper.registerCommand(cmdString, plugin);
-		PluginCommand pCmd = helper.getCommand(cmdString);
-		pCmd.setPermission(cmd.getPermission().getDefault().toString());
+		PluginCommand pCmd = helper.registerCommand(cmdString, plugin);
+		cmdString = pCmd.getName();
 		if(cmd.getSubcommand().length == 0) {
-			pCmd.setPermissionMessage("You don't have permission to do that.");
 			if(!cmd.getDescription().isEmpty())
 				pCmd.setDescription(cmd.getDescription());
 			else
