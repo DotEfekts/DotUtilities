@@ -6,8 +6,8 @@ public class MenuButton {
 	
 	private ButtonListener listener;
 	private ItemStack item;
-	private Menu menu;
-	private int pos;
+	private final Menu menu;
+	private final int pos;
 	
 	//MenuButton(ItemStack item, Menu menu, int pos) {
 	//}

@@ -7,17 +7,17 @@ import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class CommandHelper {
-	private CommandManager manager;
-	private CommandRegistration register;
-	private CommandListener listener;
-	private HashMap<String, JavaPlugin> commandSource;
+	private final CommandManager manager;
+	private final CommandRegistration register;
+	private final CommandListener listener;
+	private final HashMap<String, JavaPlugin> commandSource;
 	private static CommandHelper instance;
 	
 	private CommandHelper(){
 		manager = new CommandManager(this);
 		listener = new CommandListener(manager);
 		register = new CommandRegistration();
-		commandSource = new HashMap<String, JavaPlugin>();
+		commandSource = new HashMap<>();
 	}
 	
 	PluginCommand getCommand(String command){

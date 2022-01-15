@@ -1,36 +1,35 @@
 package net.dotefekts.dotutils.commandhelper;
 
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
-
 import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
-import org.bukkit.event.Listener;
 import org.bukkit.help.GenericCommandHelpTopic;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Objects;
+
 public class CommandManager {
-	private HashMap<String, JavaPlugin> commandLookup;
-	private HashMap<String, CommandCompleter> tabCompleters;
-	private CommandHelper helper;
-	private SubmenuManager submanager;
-	private Permission defPermission = new Permission("", "The default permission. Anyone can use this command.", PermissionDefault.TRUE);
+	private final HashMap<String, JavaPlugin> commandLookup;
+	private final CommandHelper helper;
+	private final SubmenuManager submanager;
+	private final Permission defPermission = new Permission("", "The default permission. Anyone can use this command.", PermissionDefault.TRUE);
 	
 	CommandManager(CommandHelper helper) {
 		this.helper = helper;
-		commandLookup = new HashMap<String, JavaPlugin>();
-		tabCompleters = new HashMap<String, CommandCompleter>();
+		commandLookup = new HashMap<>();
 		submanager = new SubmenuManager();
 	}
 	
-	public void registerCommands(Listener listener, JavaPlugin plugin) {
+	@SuppressWarnings("unused")
+	public void registerCommands(Object commandHandler, JavaPlugin plugin) {
 		int intMethods = 0;
 		int intCommands = 0;
-		Class<? extends Listener> listenerClass = listener.getClass();
-		for(Method method : listenerClass.getDeclaredMethods()){
+		Class<?> commandHandlerClass = commandHandler.getClass();
+		for(Method method : commandHandlerClass.getDeclaredMethods()){
 			Permission permission = null;
 			
 			if(method.isAnnotationPresent(PermissionHandler.class)) {
@@ -47,17 +46,17 @@ public class CommandManager {
 				if(method.getParameterTypes().length == 1) {
 					if(method.getParameterTypes()[0].equals(CommandEvent.class)) {
 						CommandHandler[] annos = method.getAnnotation(CommandHandlers.class).value();
-						ArrayList<Command> newCommands = new ArrayList<Command>();
-						HashMap<String, JavaPlugin> newCommandLookup = new HashMap<String, JavaPlugin>();
+						ArrayList<Command> newCommands = new ArrayList<>();
+						HashMap<String, JavaPlugin> newCommandLookup = new HashMap<>();
 						
-						String command = "";
-						String description = "";
-						String format = "";
-						boolean serverCommand = false;
+						var command = "";
+						var description = "";
+						var format = "";
+						boolean serverCommand;
 					
 						for(CommandHandler handler : annos) {
 							
-							if(checkValidSilent(handler.command(), method.getName()))
+							if(checkValidSilent(handler.command()))
 								command = handler.command();
 							else if(command.isEmpty())
 								if(!checkValid(handler.command(), method.getName()))
@@ -66,18 +65,16 @@ public class CommandManager {
 							if(!handler.description().isEmpty())
 								description = handler.description();
 								
-							if(checkFormat(handler.format()))
-								if(!handler.format().isEmpty())
-									format = handler.format();
-								else;
-							else {
+							if(!handler.format().isEmpty() && checkFormat(handler.format())) {
+								format = handler.format();
+							} else {
 								Bukkit.getLogger().warning("[CommandHelper] Format error on command " + handler.command());
 								continue;
 							}
 								
 							serverCommand = handler.serverCommand();
 								
-							newCommands.add(new Command(command, description, format, serverCommand, null, method, listener));
+							newCommands.add(new Command(command, description, format, serverCommand, null, method, commandHandler));
 							intCommands++;
 							if(!newCommandLookup.containsKey(command))
 								newCommandLookup.put(command, plugin);
@@ -113,85 +110,44 @@ public class CommandManager {
 				
 				if(checkValid(handler.command(), method.getName())){
 					
-					if(!checkFormat(handler.format())) {
+					if(!handler.format().isEmpty() && !checkFormat(handler.format())) {
 						Bukkit.getLogger().warning("[CommandHelper] Format error on command " + handler.command());
 						continue;
 					}
 					
-					Command command = new Command(handler.command(), handler.description(), handler.format(), handler.serverCommand(), null, method, listener);
+					Command command = new Command(handler.command(), handler.description(), handler.format(), handler.serverCommand(), null, method, commandHandler);
 					submanager.addSubcommand(command);
 					
 					intCommands++;
 					commandLookup.put(handler.command(), plugin);
-				
-					if(permission != null)
-						command.setPermission(permission);
-					else
-						command.setPermission(defPermission);
+
+					command.setPermission(Objects.requireNonNullElse(permission, defPermission));
 						
 					registerCommand(command, plugin);
 					intMethods++;
 				}
 			}
 		}
-		Bukkit.getLogger().info("[CommandHelper] " + intCommands + " commands registered to " + intMethods + " methods.");
+		Bukkit.getLogger().info("[CommandHelper] " + intCommands + " command(s) registered to " +
+				intMethods + " method(s) in class " + commandHandlerClass.getSimpleName() + ".");
 	}
 	
-	private boolean checkValidSilent(String command, String name) {
+	private boolean checkValidSilent(String command) {
 		if(command.isEmpty())
 			return false;
 		else if(commandLookup.containsKey(command))
 			return false;
 		else if(helper.getCommand(command.split(" ")[0]) != null)
-			if(!(helper.getCommand(command.split(" ")[0]).getTabCompleter() instanceof CommandCompleter))
-				return false;
+			return helper.getCommand(command.split(" ")[0]).getTabCompleter() instanceof CommandCompleter;
 		return true;
 	}
 
 	private boolean checkFormat(String format) {
-		String[] arr = format.split(" ");
-		
-		for(String str : arr){
-			if(!str.isEmpty())
-			if(str.equalsIgnoreCase("n"))
-				if(arr.length != 1)
-					return false;
-				else;
-			else if(str.length() < 3)
-				return false;
-			else {
-				switch(str.substring(1, 2)) {
-					case "[":
-						if(!str.substring(str.length() - 1, str.length()).equalsIgnoreCase("]"))
-							return false;
-						break;
-					case "<":
-						if(!str.substring(str.length() - 1, str.length()).equalsIgnoreCase(">"))
-							return false;
-						break;
-					case ".":
-						if(!str.equalsIgnoreCase("..."))
-							return false;
-						break;
-				}
-				
-				switch(str.substring(0, 1)) {
-					case "i":
-					case "d":
-					case "p":
-					case "s":
-					case ".":
-						break;
-					default:
-						return false;
-				}
-			}
-		}
-		return true;
+		return format.matches("^([idps](<[\\w ]+>|\\[[\\w ]+]))(\\s+[idps](<[\\w ]+>|\\[[\\w ]+]))*(\\s+\\.\\.\\.)?$");
 	}
 
 	ArrayList<Command> matchCommands(String command, boolean server) {
-		ArrayList<Command> cmdList = new ArrayList<Command>();
+		ArrayList<Command> cmdList = new ArrayList<>();
 		for(Command cmd : submanager.getSubcommands(command))
 			if(cmd.isServerCommand() == server)
 				cmdList.add(cmd);
@@ -229,14 +185,14 @@ public class CommandManager {
 			else
 				pCmd.setDescription("This command does not have a description set.");
 			
-			if(!cmd.getFormat().isEmpty())
+			if(cmd.getFormat().length != 0)
 				pCmd.setUsage("/" + cmdString + " " + cmd.getParsedFormat());
 			else
 				pCmd.setUsage("A usage has not been set for this command.");	
 		} else {
-			if(pCmd.getDescription().isEmpty() || pCmd.getDescription() == null)
+			if(pCmd.getDescription().isEmpty())
 				pCmd.setDescription("This command is used to access a submenu.");
-			if(pCmd.getUsage().isEmpty() || pCmd.getUsage() == null)
+			if(pCmd.getUsage().isEmpty())
 				pCmd.setUsage("/" + cmdString + " " + "<Subcommand> ...");
 		}
 		
@@ -244,7 +200,6 @@ public class CommandManager {
 			CommandCompleter completer;
 			completer = new CommandCompleter(cmdString, this);						
 			pCmd.setTabCompleter(completer);
-			tabCompleters.put(cmdString, completer);
 		}
 		
 		if(Bukkit.getHelpMap().getHelpTopic(pCmd.getName()) == null)
@@ -255,18 +210,17 @@ public class CommandManager {
 		if(command.isEmpty()) {
 			Bukkit.getLogger().warning("[CommandHelper] No command supplied for the method " + method);
 			return false;
+
 		} else if(commandLookup.containsKey(command)) {
 			Bukkit.getLogger().warning("[CommandHelper] Method " + method+ " tried to register a command registered to another method.");
 			return false;
-		} else if(helper.getCommand(command.split(" ")[0]) != null)
+		} else if(helper.getCommand(command.split(" ")[0]) != null) {
 			if(!(helper.getCommand(command.split(" ")[0]).getTabCompleter() instanceof CommandCompleter)) {
 				Bukkit.getLogger().warning("[CommandHelper] Method " + method + " tried to register a command registered to another plugin.");
 				return false;
-			} else;
-		return true;
-	}
+			}
+		}
 
-	SubmenuManager getSubmanager() {
-		return submanager;		
+		return true;
 	}
 }

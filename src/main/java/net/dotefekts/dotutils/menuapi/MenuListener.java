@@ -9,8 +9,8 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.Plugin;
 
 public class MenuListener implements Listener {
-	private Plugin plugin;
-	private MenuManager manager;
+	private final Plugin plugin;
+	private final MenuManager manager;
 	
 	MenuListener(Plugin plugin, MenuManager manager) {
 		this.plugin = plugin;

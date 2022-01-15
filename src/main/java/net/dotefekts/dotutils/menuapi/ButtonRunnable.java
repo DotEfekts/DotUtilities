@@ -2,8 +2,8 @@ package net.dotefekts.dotutils.menuapi;
 
 public class ButtonRunnable implements Runnable {
 	
-	private MenuButton button;
-	private Menu menu;
+	private final MenuButton button;
+	private final Menu menu;
 
 	ButtonRunnable(Menu menu, MenuButton button) {
 		this.button = button;

@@ -20,7 +20,8 @@ class CommandRegistration {
 				Bukkit.getLogger().warning("Fallback prefix registered for " + command + ".");
 		
 		PluginCommand cmd = plugin.getCommand(command);
-		cmd.setExecutor(executor);
+		if(cmd != null)
+			cmd.setExecutor(executor);
 		
 		return cmd;
 	}
@@ -50,20 +51,11 @@ class CommandRegistration {
 			c.setAccessible(true);
 	 
 			command = c.newInstance(name, plugin);
-		} catch (SecurityException e) {
-			e.printStackTrace();
-		} catch (IllegalArgumentException e) {
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
-		} catch (InstantiationException e) {
-			e.printStackTrace();
-		} catch (InvocationTargetException e) {
-			e.printStackTrace();
-		} catch (NoSuchMethodException e) {
+		} catch (SecurityException | InvocationTargetException | IllegalArgumentException |
+				IllegalAccessException | InstantiationException | NoSuchMethodException e) {
 			e.printStackTrace();
 		}
-	 
+
 		return command;
 	}
 }

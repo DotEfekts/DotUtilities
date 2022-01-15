@@ -9,41 +9,39 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
+@SuppressWarnings("ClassCanBeRecord")
 public class CommandListener implements CommandExecutor {
-	private CommandManager manager;
+	private final CommandManager manager;
 
 	CommandListener(CommandManager manager) {
 		this.manager = manager;
 	}
 
 	@Override
-	public boolean onCommand(CommandSender commandSender, org.bukkit.command.Command cmd, String label, String[] args) {
+	public boolean onCommand(@NotNull CommandSender commandSender, org.bukkit.command.Command cmd, @NotNull String label, String[] args) {
 		Command command = manager.matchCommand(cmd.getName(), args, !(commandSender instanceof Player));
 		if(command != null) {
-			if(!command.isServerCommand())
-				if(!((Player)commandSender).hasPermission(command.getPermission())) {
+			if(!command.isServerCommand()) {
+				assert commandSender instanceof Player;
+				if(!commandSender.hasPermission(command.getPermission())) {
 					commandSender.sendMessage(ChatColor.RED + "You don't have permission to do that.");
 					return true;
 				}
-			
+			}
+
 			int len = command.getSubcommand().length;
 			String[] newArgs = new String[args.length - len];
-			
-			for(int i = len; i < args.length; i++)
-				newArgs[i - len] = args[i];
-			
-			if(!command.getFormat().isEmpty()) {	
-				if(command.getFormat().equalsIgnoreCase("n") && newArgs.length > 0) {
-					commandSender.sendMessage(ChatColor.RED + "Error, too many arguments provided.");
-					return true;
-				}
-				String[] format = command.getFormat().toLowerCase().split(" ");
+
+			if (args.length - len >= 0)
+				System.arraycopy(args, len, newArgs, 0, args.length - len);
+
+			var format = command.getFormat();
+			if(format.length > 0) {
 				boolean optional = false;
-				if(format.length > 0)
-				if(!format[0].equalsIgnoreCase("n"))
-				for(int i = 0; i < format.length || i < newArgs.length; i++){
-					if(i < newArgs.length && i < format.length){
+				for(int i = 0; i < format.length || i < newArgs.length; i++) {
+					if(i < newArgs.length && i < format.length) {
 						if(format[i].startsWith("i")){
 							try {
 								Integer.parseInt(newArgs[i]);
@@ -59,17 +57,17 @@ public class CommandListener implements CommandExecutor {
 								return true;
 							}
 						} else if(format[i].startsWith("p")){
-							if(Bukkit.getPlayerExact(newArgs[i]) == null) {
+							if(Bukkit.getPlayer(newArgs[i]) == null) {
 								commandSender.sendMessage(ChatColor.RED + "Error, the argument " + newArgs[i] + " must be an online player.");
 								return true;
 							}
 						}
-						
-						if(format[i].substring(1, 1).equals("["))
+
+						if(format[i].charAt(1) == '[')
 							optional = true;
 					} else {
-						if(format.length > newArgs.length && optional == false) {
-							if(!format[i].substring(1, 2).equals("[") && !format[i].equals("...")) {
+						if(format.length > newArgs.length && !optional) {
+							if(format[i].charAt(1) != '[' && !format[i].equals("...")) {
 								commandSender.sendMessage(ChatColor.RED + "Error, not enough arguments provided.");
 								return true;
 							}
@@ -81,11 +79,13 @@ public class CommandListener implements CommandExecutor {
 						}
 					}
 				}
+			} else if(newArgs.length > 0) {
+				commandSender.sendMessage(ChatColor.RED + "Error, too many arguments provided.");
+				return true;
 			}
-			
+
 			try {
-				 Boolean result = (Boolean) command.getExecutor().invoke(command.getListener(), new CommandEvent(commandSender, command, newArgs));
-				 return result.booleanValue();
+				return (Boolean) command.getExecutor().invoke(command.getCommandHandler(), new CommandEvent(commandSender, command, newArgs));
 			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 				e.printStackTrace();
 				commandSender.sendMessage(ChatColor.RED + "An exception occurred during execution of the command. You should let the server owner know about this.");
@@ -93,7 +93,7 @@ public class CommandListener implements CommandExecutor {
 			}
 		} else {
 			List<String> list = getSublist(args, !(commandSender instanceof Player), cmd);
-			if(list.size() != 0) 
+			if(list.size() != 0)
 				for(String str : list)
 					commandSender.sendMessage(str);
 			else if(manager.matchCommand(cmd.getName(), args, (commandSender instanceof Player)) != null || getSublist(args, (commandSender instanceof Player), cmd).size() != 0)
@@ -101,13 +101,13 @@ public class CommandListener implements CommandExecutor {
 					commandSender.sendMessage(ChatColor.RED + "This is a server command. It cannot be run as a player.");
 				else
 					commandSender.sendMessage(ChatColor.RED + "This is a player command. It cannot be run as the server.");
-			
+
 		}
 		return true;
 	}
-	
+
 	private List<String> getSublist(String[] args, boolean server, org.bukkit.command.Command cmd) {
-		List<String> list = new ArrayList<String>();
+		List<String> list = new ArrayList<>();
 		String[] argC = args.clone();
 		List<Command> subs = manager.matchCommands(cmd.getName(), server);
 		List<String> direct;
@@ -123,11 +123,10 @@ public class CommandListener implements CommandExecutor {
 				}
 			} else {
 				argC = new String[argC.length - 1];
-				for(int x = 0; x < argC.length; x++)
-					argC[x] = args[x];
+				System.arraycopy(args, 0, argC, 0, argC.length);
 			}
 		}
 		return list;
 	}
-	
+
 }

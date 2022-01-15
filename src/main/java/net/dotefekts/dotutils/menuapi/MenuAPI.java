@@ -6,7 +6,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 
 public class MenuAPI {
-	private MenuManager manager;
+	private final MenuManager manager;
 	private static MenuAPI instance;
 	
 	private MenuAPI(Plugin plugin){

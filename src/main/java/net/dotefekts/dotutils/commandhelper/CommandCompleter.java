@@ -8,6 +8,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 public class CommandCompleter implements TabCompleter {
 	String command;
@@ -19,12 +20,12 @@ public class CommandCompleter implements TabCompleter {
 	}
 
 	@Override
-	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-		ArrayList<String> auto = new ArrayList<String>();
+	public List<String> onTabComplete(@NotNull CommandSender sender, Command command, @NotNull String alias, String[] args) {
+		ArrayList<String> auto = new ArrayList<>();
 		
 		if(!command.getName().equalsIgnoreCase(this.command)) {
 			Bukkit.getLogger().warning("[CommandHelper] CommandCompleter asked for completion of another command.");
-			return new ArrayList<String>();
+			return new ArrayList<>();
 		}
 		
 		net.dotefekts.dotutils.commandhelper.Command cmd = manager.matchCommand(command.getName(), args, !(sender instanceof Player));
@@ -34,7 +35,7 @@ public class CommandCompleter implements TabCompleter {
 		}
 		
 		String[] subcommand = cmd.getSubcommand();
-		String[] format = cmd.getFormat().split(" ");
+		String[] format = cmd.getFormat();
 		int argPos = args.length - 1;	
 		int formatPos = argPos - subcommand.length;
 		

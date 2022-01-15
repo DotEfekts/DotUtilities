@@ -1,33 +1,45 @@
 package net.dotefekts.dotutils.commandhelper;
 
-import java.lang.reflect.Method;
-
-import org.bukkit.event.Listener;
 import org.bukkit.permissions.Permission;
 
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.StringJoiner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class Command {
-	private String command;
-	private String[] subcommand;
-	private String description;
-	private String format;
-	private boolean serverCommand;
+	private final String command;
+	private final String[] subcommand;
+	private final String description;
+	private final String[] format;
+	private final boolean serverCommand;
 	private Permission permission;
-	private Method executor;
-	private Listener listener;
+	private final Method executor;
+	private final Object commandHandler;
 	
-	Command(String command, String description, String format, boolean serverCommand, Permission permission, Method executor, Listener listener) {
-		this.command = command.split(" ")[0];
-		
-		subcommand = new String[command.split(" ").length - 1];
-		for(int i = 1; i < command.split(" ").length; i++)
-			subcommand[i - 1] = command.split(" ")[i];
-		
+	Command(String command, String description, String format, boolean serverCommand, Permission permission, Method executor, Object commandHandler) {
+		var commandSplit = command.split(" ");
+
+		this.command = commandSplit[0];
+		this.subcommand = Arrays.copyOfRange(commandSplit, 1, commandSplit.length);
+
 		this.description = description;
-		this.format = format;
 		this.serverCommand = serverCommand;
 		this.permission = permission;
 		this.executor = executor;
-		this.listener = listener;
+		this.commandHandler = commandHandler;
+
+		var pattern = Pattern.compile("([idps](?:<[\\w ]+>|\\[[\\w ]+])|\\.\\.\\.)");
+		Matcher matcher = pattern.matcher(format);
+
+		var formatList = new ArrayList<String>();
+
+		while(matcher.find())
+			formatList.add(matcher.group(1));
+
+		this.format = formatList.toArray(new String[0]);
 	}
 	
 	public Permission getPermission() {
@@ -50,39 +62,31 @@ public class Command {
 		return description;
 	}
 
-	public String getFormat() {
-		return format;
-	}
+	public String[] getFormat() { return format; }
 
 	public boolean isServerCommand() {
 		return serverCommand;
 	}
 
-	Method getExecutor() {
-		return executor;
-	}
+	Method getExecutor() { return executor; }
 
-	Listener getListener() {
-		return listener;
-	}
+	Object getCommandHandler() { return commandHandler; }
 	
 	public String getParsedFormat() {
-		String formatted = "";
-		for(String str : format.split(" "))
-			if(!str.isEmpty() && !str.equalsIgnoreCase("..."))
-				formatted = formatted + " " + str.substring(1, str.length());
-			else 
-				formatted = formatted + " " + str;
-		return formatted;
+		StringJoiner formatted = new StringJoiner(" ");
+
+		for(var param : format)
+			formatted.add(param.equals("...") ? param : param.substring(1));
+
+		return formatted.toString();
 	}
 	
 	public String getSubcommandString() {
-		String formatted = "";
+		StringJoiner formatted = new StringJoiner(" ");
+
 		for(String str : subcommand)
-			if(formatted.isEmpty())
-				formatted = str;
-			else 
-				formatted = formatted + " " + str;
-		return formatted;
+			formatted.add(str);
+
+		return formatted.toString();
 	}
 }

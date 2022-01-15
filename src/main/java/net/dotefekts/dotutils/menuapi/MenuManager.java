@@ -6,7 +6,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 
 public class MenuManager {
-	private ArrayList<Menu> activeMenus;
+	private final ArrayList<Menu> activeMenus;
 
 	MenuManager() {
 		activeMenus = new ArrayList<Menu>();
@@ -60,9 +60,9 @@ public class MenuManager {
 }
 
 class LookupContainer {
-	private MenuButton button;
-	private Menu menu;
-	private boolean hasListener;
+	private final MenuButton button;
+	private final Menu menu;
+	private final boolean hasListener;
 	
 	LookupContainer(MenuButton button, Menu menu){
 		this.button = button;

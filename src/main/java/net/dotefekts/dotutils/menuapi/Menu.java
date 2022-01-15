@@ -7,8 +7,8 @@ import org.bukkit.inventory.ItemStack;
 
 public class Menu {
 	private Inventory inv;
-	private MenuButton[] buttons;
-	private MenuManager manager;
+	private final MenuButton[] buttons;
+	private final MenuManager manager;
 	private boolean exists = true;
 	
 	Menu(Player player, int size, String title, MenuManager manager) {
@@ -27,7 +27,10 @@ public class Menu {
 	}
 	
 	public MenuButton setButton(ItemStack item, int x, int y, ButtonListener listener) {
-		int pos = x + (y * 9);		
+		return setButton(item, x + (y * 9), listener);
+	}
+
+	public MenuButton setButton(ItemStack item, int pos, ButtonListener listener) {
 		MenuButton button = new MenuButton(item, this, pos, listener);
 		buttons[pos] = button;
 		inv.setItem(button.getPos(), button.getItem());
